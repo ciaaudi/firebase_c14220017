@@ -18,7 +18,6 @@ import com.google.firebase.firestore.firestore
 class MainActivity : AppCompatActivity() {
     val db = Firebase.firestore
     var DataProvinsi = ArrayList<daftarProvinsi>()
-//    lateinit var lvAdapter: ArrayAdapter<daftarProvinsi>
     lateinit var lvAdapter: SimpleAdapter
 
     lateinit var _etProvinsi: EditText
@@ -50,11 +49,7 @@ class MainActivity : AppCompatActivity() {
                 android.R.id.text2
             )
         )
-//        lvAdapter = ArrayAdapter(
-//            this,
-//            android.R.layout.simple_list_item_1,
-//            DataProvinsi
-//        )
+
         _lvData.adapter = lvAdapter
 
 
@@ -62,34 +57,35 @@ class MainActivity : AppCompatActivity() {
             TambahData(db, _etProvinsi.text.toString(), _etIbukota.text.toString())
         }
         readData(db)
-//        _lvData.setOnItemLongClickListener { parent,view,position,id->
-//            val namaPro = data[position].get("Pro")
-//            if (namaPro != null){
-//                db.collection("tbProvinsi")
-//                    .document(namaPro)
-//                    .delete()
-//                    .addOnSuccessListener {
-//                        Log.d("Firebase", "Berhasil diHapus")
-//                        readData(db)
-//                    }
-//                    .addOnFailureListener {
-//                            e->
-//                        Log.w("Firebase", e.message.toString())
-//                    }
-//            }
-//            true
-//
-//        }
+
+        _lvData.setOnItemLongClickListener { parent, view, position, id ->
+            val namaPro = data[position].get("Pro")
+            if (namaPro != null) {
+                db.collection("tbProvinsi")
+                    .document(namaPro)
+                    .delete()
+                    .addOnSuccessListener {
+                        Log.d("Firebase", "Data Berhasil Dihapus")
+                        readData(db)
+                    }
+                    .addOnFailureListener {
+                        Log.d("Firebase", it.message.toString())
+                    }
+            }
+            true
+        }
 
     }
     fun TambahData(db: FirebaseFirestore, Provinsi: String, Ibukota: String){
         val dataBaru = daftarProvinsi(Provinsi, Ibukota)
         db.collection("tbProvinsi")
-            .add(dataBaru)
+            .document(dataBaru.provinsi)
+            .set(dataBaru)
             .addOnSuccessListener {
                 _etProvinsi.setText("")
                 _etIbukota.setText("")
                 Log.d("Firebase", "Data Berhasil Disimpan")
+                readData(db)
             }
             .addOnFailureListener{
                 Log.d("Firebase", it.message.toString())
